@@ -1,0 +1,24 @@
+<?xml version='1.0'?>
+<schema>
+	<tables>
+		<table>
+			<name>vtiger_tctotals</name>
+			<sql><![CDATA[CREATE TABLE `vtiger_tctotals` (
+  `tctotalsid` int(11) NOT NULL,
+  `tctotalno` varchar(255) DEFAULT NULL,
+  `workdate` date DEFAULT NULL,
+  `totaltime` varchar(10) DEFAULT NULL,
+  `totalhours` decimal(10,2) DEFAULT NULL,
+  PRIMARY KEY (`tctotalsid`),
+  KEY `workdate` (`workdate`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8]]></sql>
+		</table>
+		<table>
+			<name>vtiger_tctotalscf</name>
+			<sql><![CDATA[CREATE TABLE `vtiger_tctotalscf` (
+  `tctotalsid` int(11) NOT NULL,
+  PRIMARY KEY (`tctotalsid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8]]></sql>
+		</table>
+	</tables>
+</schema>
