@@ -57,13 +57,7 @@ class TCTotalsHandler extends VTEventHandler {
 				}
 				$relto=$adb->query_result($tcdata, 0, 'relatedto');
 				$pdoid=$adb->query_result($tcdata, 0, 'product_id');
-				if (($entityData->oldrelto!=0 && $entityData->oldpdoid!=0)  // we are editing
-					&&
-					($relto != $entityData->oldrelto || $pdoid != $entityData->oldpdoid)) {  // relatedto has changed
-					$this->updateTotalTimeForRelatedTo($workdate, $entityData->oldrelto, $entityData->oldpdoid);
-				}
 				$this->updateTotalTimeForUserOnDate($tcuser, $workdate);
-				$this->updateTotalTimeForRelatedTo($workdate, $relto, $pdoid);
 			}
 		}
 	}
@@ -86,76 +80,12 @@ class TCTotalsHandler extends VTEventHandler {
 			$tctotal2update=$adb->getOne("select tctotalsid from vtiger_tctotals inner join vtiger_crmentity on crmid=tctotalsid where smownerid=$user and workdate='$workdate' and deleted=0");
 		}
 		$tctot=$adb->query("select coalesce(sum(time_to_sec(totaltime))/3600,0) as totnum, coalesce(sec_to_time(sum(time_to_sec(totaltime))),0) as tottime
-					 from vtiger_timecontrol
-					 inner join vtiger_crmentity on crmid=timecontrolid
-					 where date_start='$workdate' and smownerid=$user and deleted=0");
+			from vtiger_timecontrol
+			inner join vtiger_crmentity on crmid=timecontrolid
+			where date_start='$workdate' and smownerid=$user and deleted=0");
 		$totnum=$adb->query_result($tctot, 0, 'totnum');
 		$tottim=$adb->query_result($tctot, 0, 'tottime');
 		$adb->query("update vtiger_tctotals set totalhours=$totnum,totaltime='$tottim' where tctotalsid = $tctotal2update");
-	}
-
-	public static function updateTotalTimeForRelatedTo($workdate, $relto, $pdoid) {
-		global $adb,$current_module,$current_user;
-		if (vtlib_isModuleActive('TCTotalsEntity')) {
-		// First Entity
-			if (!empty($relto)) {
-				$recordExists=$adb->getOne("select count(*) from vtiger_tctotalsentity inner join vtiger_crmentity on crmid=tctotalsentityid where workdate='$workdate' and relto=$relto and deleted=0");
-				if ($recordExists==0) { // no total record for this entity on that date, we have to create one
-					include_once 'modules/TCTotalsEntity/TCTotalsEntity.php';
-					$current_module='TCTotalsEntity';
-					$tc=new TCTotalsEntity();
-					$tc->mode='';
-					$tc->column_fields['assigned_user_id']=$current_user->id;
-					$tc->save('TCTotalsEntity');
-					$adb->query("update vtiger_tctotalsentity set
-			  relto = $relto,
-			  workdate='$workdate' where tctotalsentityid = ".$tc->id);  // displaytype=2
-					$tctotal2update=$tc->id;
-					$current_module='Timecontrol';
-				} else {
-					$tctotal2update=$adb->getOne("select tctotalsentityid from vtiger_tctotalsentity where workdate='$workdate' and relto=$relto and deleted=0");
-				}
-				$addtcs="relatedto=$relto";
-				if (getSalesEntityType($relto)=='Accounts') { // we add time spent on their projects and helpdesk
-					$addtcs.=" or relatedto in (select ticketid from vtiger_troubletickets where parent_id=$relto)";  // HD
-					$addtcs.=" or relatedto in (select projectid from vtiger_project where linktoaccountscontacts=$relto)";  // Prj
-					$addtcs.=" or relatedto in (select projecttaskid from vtiger_projecttask inner join vtiger_project on vtiger_project.projectid=vtiger_projecttask.projectid where vtiger_project.linktoaccountscontacts=$relto)";  // PrjTask
-				}
-				$tctot=$adb->query("select coalesce(sum(time_to_sec(totaltime))/3600,0) as totnum, coalesce(sec_to_time(sum(time_to_sec(totaltime))),0) as tottime
-					 from vtiger_timecontrol
-					 inner join vtiger_crmentity on crmid=timecontrolid
-					 where date_start='$workdate' and ($addtcs) and deleted=0");
-				$totnum=$adb->query_result($tctot, 0, 'totnum');
-				$tottim=$adb->query_result($tctot, 0, 'tottime');
-				$adb->query("update vtiger_tctotalsentity set totalhours=$totnum,totaltime='$tottim' where tctotalsentityid = $tctotal2update");
-			}
-		// Now again for Product/Service
-			if (!empty($pdoid)) {
-				$recordExists=$adb->getOne("select count(*) from vtiger_tctotalsentity inner join vtiger_crmentity on crmid=tctotalsentityid where workdate='$workdate' and relto=$pdoid and deleted=0");
-				if ($recordExists==0) { // no total record for this entity on that date, we have to create one
-					include_once 'modules/TCTotalsEntity/TCTotalsEntity.php';
-					$current_module='TCTotalsEntity';
-					$tc=new TCTotalsEntity();
-					$tc->mode='';
-					$tc->column_fields['assigned_user_id']=$current_user->id;
-					$tc->save('TCTotalsEntity');
-					$adb->query("update vtiger_tctotalsentity set
-			  relto = $pdoid,
-			  workdate='$workdate' where tctotalsentityid = ".$tc->id);  // displaytype=2
-					$tctotal2update=$tc->id;
-					$current_module='Timecontrol';
-				} else {
-					$tctotal2update=$adb->getOne("select tctotalsentityid from vtiger_tctotalsentity where workdate='$workdate' and relto=$pdoid and deleted=0");
-				}
-				$tctot=$adb->query("select coalesce(sum(time_to_sec(totaltime))/3600,0) as totnum, coalesce(sec_to_time(sum(time_to_sec(totaltime))),0) as tottime
-					 from vtiger_timecontrol
-					 inner join vtiger_crmentity on crmid=timecontrolid
-					 where date_start='$workdate' and product_id=$pdoid and deleted=0");
-				$totnum=$adb->query_result($tctot, 0, 'totnum');
-				$tottim=$adb->query_result($tctot, 0, 'tottime');
-				$adb->query("update vtiger_tctotalsentity set totalhours=$totnum,totaltime='$tottim' where tctotalsentityid = $tctotal2update");
-			}
-		}// TCTotalsEntity Active
 	}
 }
 ?>
