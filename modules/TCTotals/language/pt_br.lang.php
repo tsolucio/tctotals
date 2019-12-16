@@ -10,16 +10,16 @@
 
 $mod_strings = array(
 	'TCTotals' => 'Totais TimeControl',
-	'SINGLE_TCTotals' => 'Total TimeControl ',
+	'SINGLE_TCTotals' => 'Controlo de Tempo',
 	'TCTotals ID' => ' ID Totais TimeControl ',
 
 	'LBL_CUSTOM_INFORMATION' => 'Informação personalizada',
-	'LBL_TCTOTALS_INFORMATION' => 'TimeControl Informação Total',
+	'LBL_TCTOTALS_INFORMATION' => 'Informação sobre o número Total de horas ',
 	'LBL_DESCRIPTION_INFORMATION' => 'Descrição',
 
 	'TotalTime' => 'Tempo Total',
 	'TotalHours' => 'Total de Horas',
-	'TCTotalNo' => 'TimeControl Número Total',
+	'TCTotalNo' => 'Número total de horas',
 	'Work Date' => 'Data de Trabalho',
 );
 ?>
