@@ -9,17 +9,18 @@
  ************************************************************************************/
 
 $mod_strings = array(
-	'TCTotals' => 'TimeControl Totals',
-	'SINGLE_TCTotals' => 'TimeControl Total',
-	'TCTotals ID' => 'TimeControl Totals ID',
+	'TCTotals' => 'Uren opsommingen',
+	'SINGLE_TCTotals' => 'Uren opsomming',
+	'TCTotals ID' => 'Uren opsomming ID',
 
-	'LBL_CUSTOM_INFORMATION' => 'Custom Information',
-	'LBL_TCTOTALS_INFORMATION' => 'TC Total Information',
-	'LBL_DESCRIPTION_INFORMATION' => 'Description',
+	'LBL_CUSTOM_INFORMATION' => 'Eigen informatie',
+	'LBL_TCTOTALS_INFORMATION' => 'Uren opsomming informatie',
+	'LBL_DESCRIPTION_INFORMATION' => 'Beschrijving',
+	'LBL_ADDINFO_INFORMATION' => 'Aanvullende informatie',
 
-	'TotalTime' => 'Total Time',
-	'TotalHours' => 'Total Hours',
-	'TCTotalNo' => 'TC Total No',
-	'Work Date' => 'Work Date',
+	'TotalTime' => 'Totale tijd',
+	'TotalHours' => 'Totaal aantal uren',
+	'TCTotalNo' => 'Uren opsomming nr',
+	'Work Date' => 'Werkdatum',
 );
 ?>
