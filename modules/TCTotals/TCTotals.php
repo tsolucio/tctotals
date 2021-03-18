@@ -11,9 +11,6 @@ require_once 'data/CRMEntity.php';
 require_once 'data/Tracker.php';
 
 class TCTotals extends CRMEntity {
-	public $db;
-	public $log;
-
 	public $table_name = 'vtiger_tctotals';
 	public $table_index= 'tctotalsid';
 	public $column_fields = array();
@@ -126,8 +123,11 @@ class TCTotals extends CRMEntity {
 		$other = CRMEntity::getInstance($related_module);
 
 		$singular_modname = 'SINGLE_'.$related_module;
-
-		$tcdata=$adb->query("select smownerid,workdate from vtiger_tctotals inner join vtiger_crmentity on crmid=tctotalsid where tctotalsid=$id");
+		$crmEntityTable = CRMEntity::getcrmEntityTableAlias('TCTotals');
+		$tcdata=$adb->pquery(
+			'select vtiger_crmentity.smownerid,workdate from vtiger_tctotals inner join '.$crmEntityTable.' on vtiger_crmentity.crmid=tctotalsid where tctotalsid=?',
+			array($id)
+		);
 		$workdate=$adb->query_result($tcdata, 0, 'workdate');
 		$tcuser=$adb->query_result($tcdata, 0, 'smownerid');
 
@@ -153,7 +153,7 @@ class TCTotals extends CRMEntity {
 		}
 
 		$query = "SELECT vtiger_crmentity.*, $other->table_name.*";
-		$query .= ", CASE WHEN (vtiger_users.user_name NOT LIKE '') THEN vtiger_users.user_name ELSE vtiger_groups.groupname END AS user_name";
+		$query .= ", CASE WHEN (vtiger_users.user_name NOT LIKE '') THEN vtiger_users.ename ELSE vtiger_groups.groupname END AS user_name";
 
 		$more_relation = '';
 		if (!empty($other->related_tables)) {
@@ -172,7 +172,7 @@ class TCTotals extends CRMEntity {
 		}
 
 		$query .= " FROM $other->table_name";
-		$query .= " INNER JOIN vtiger_crmentity ON vtiger_crmentity.crmid = $other->table_name.$other->table_index";
+		$query .= ' INNER JOIN '.$other->crmentityTableAlias." ON vtiger_crmentity.crmid = $other->table_name.$other->table_index";
 		$query .= $more_relation;
 		$query .= " LEFT  JOIN vtiger_users        ON vtiger_users.id = vtiger_crmentity.smownerid";
 		$query .= " LEFT  JOIN vtiger_groups       ON vtiger_groups.groupid = vtiger_crmentity.smownerid";
