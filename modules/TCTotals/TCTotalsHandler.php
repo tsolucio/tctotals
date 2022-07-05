@@ -75,11 +75,13 @@ class TCTotalsHandler extends VTEventHandler {
 	public static function updateTotalTimeForUserOnDate($user, $workdate) {
 		global $adb,$current_module;
 		$crmEntityTable = CRMEntity::getcrmEntityTableAlias('TCTotals');
-		$recordExists=$adb->getOne(
-			'select count(*) from vtiger_tctotals inner join '.$crmEntityTable." on vtiger_crmentity.crmid=tctotalsid
+		$rs=$adb->query(
+			'select tctotalsid from vtiger_tctotals inner join '.$crmEntityTable." on vtiger_crmentity.crmid=tctotalsid
 			where vtiger_crmentity.smownerid=$user and workdate='$workdate' and vtiger_crmentity.deleted=0"
 		);
-		if ($recordExists==0) { // no total record for this user on that date, we have to create one
+		if ($rs && $adb->num_rows($rs)>0) {
+			$tctotal2update = $adb->query_result($rs, 0, 'tctotalsid');
+		} else { // no total record for this user on that date, we have to create one
 			include_once 'modules/TCTotals/TCTotals.php';
 			$current_module='TCTotals';
 			$tc=new TCTotals();
@@ -91,11 +93,6 @@ class TCTotalsHandler extends VTEventHandler {
 			$adb->pquery('update vtiger_tctotals set workdate=? where tctotalsid=?', array($workdate, $tc->id));  // displaytype=2
 			$tctotal2update=$tc->id;
 			$current_module='Timecontrol';
-		} else {
-			$tctotal2update=$adb->getOne(
-				'select tctotalsid from vtiger_tctotals inner join '.$crmEntityTable." on vtiger_crmentity.crmid=tctotalsid
-				where vtiger_crmentity.smownerid=$user and workdate='$workdate' and vtiger_crmentity.deleted=0"
-			);
 		}
 		$crmEntityTable = CRMEntity::getcrmEntityTableAlias('Timecontrol');
 		$tctot=$adb->pquery(
